@@ -1,0 +1,54 @@
+SHELL := $(shell which bash)
+SELF  := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
+
+PACKER_VERSION      ?= 1.15.0
+PACKER_QEMU_VERSION ?= 1.1.4
+
+TARGETS = \
+$(SELF)/bin/packer \
+$(SELF)/bin/packer-plugin-qemu
+
+define HASHICORP_RELEASE_INSTALL_MAKE
+$(SELF)/bin/$(1): $(SELF)/bin/$(1)-$(2)
+	ln -sf $$< $$@
+$(SELF)/bin/$(1)-$(2):
+	install -d /tmp/$(1)-$(2)/
+	curl -fSL https://releases.hashicorp.com/$(1)/$(2)/$(1)_$(2)_linux_amd64.zip \
+	     -o /tmp/$(1)-$(2)/download.zip
+	unzip -o -d /tmp/$(1)-$(2)/ /tmp/$(1)-$(2)/download.zip
+	mv /tmp/$(1)-$(2)/$(1)* $$@
+	rm -rf /tmp/$(1)-$(2)/
+	chmod +x $$@
+endef
+
+define HASHICORP_PACKER_PLUGIN_INSTALL_MAKE
+$(SELF)/bin/packer-plugin-$(1): NAME = $$(shell $$^ describe | jq -r '"packer-plugin-qemu_v\(.version)_\(.api_version)_linux_amd64"')
+$(SELF)/bin/packer-plugin-$(1): $(SELF)/bin/packer-plugin-$(1)-$(2)
+	ln -sf $$< $$@
+	install -d $(SELF)/bin/github.com/hashicorp/$(1)/
+	ln -sf $$@ $(SELF)/bin/github.com/hashicorp/$(1)/$$(NAME)
+	sha256sum $$@ > $(SELF)/bin/github.com/hashicorp/$(1)/$$(NAME)_SHA256SUM
+$(SELF)/bin/packer-plugin-$(1)-$(2):
+	install -d /tmp/packer-plugin-$(1)-$(2)/
+	curl -fSL https://releases.hashicorp.com/packer-plugin-$(1)/$(2)/packer-plugin-$(1)_$(2)_linux_amd64.zip \
+	     -o /tmp/packer-plugin-$(1)-$(2)/download.zip
+	unzip -o -d /tmp/packer-plugin-$(1)-$(2)/ /tmp/packer-plugin-$(1)-$(2)/download.zip
+	mv /tmp/packer-plugin-$(1)-$(2)/packer-plugin-$(1)_v$(2)_*linux_amd64 $$@
+	rm -rf /tmp/packer-plugin-$(1)-$(2)/
+	chmod +x $$@
+endef
+
+export
+
+.PHONY: all clean
+
+all: $(TARGETS)
+
+clean:
+	-rm -f $(TARGETS)
+
+$(eval \
+	$(call HASHICORP_RELEASE_INSTALL_MAKE,packer,$(PACKER_VERSION)))
+
+$(eval \
+	$(call HASHICORP_PACKER_PLUGIN_INSTALL_MAKE,qemu,$(PACKER_QEMU_VERSION)))
