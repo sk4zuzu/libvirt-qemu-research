@@ -31,6 +31,9 @@ apt-get -q install -y --no-install-recommends \
     pv \
     vim
 
+apt-get -q install -y --no-install-recommends \
+    driverctl
+
 policy_rc_d_enable
 
 apt-get -q clean
