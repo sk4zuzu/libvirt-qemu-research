@@ -76,13 +76,25 @@ exec qemu-system-x86_64
 -netdev '{"type":"bridge","id":"net0","br":"u1q"}'
 -device '{"driver":"virtio-net-pci","netdev":"net0","bus":"pci.2","addr":"0x0"}'
 
+-netdev '{"type":"bridge","id":"net8","br":"u1q"}'
+-netdev '{"type":"bridge","id":"net7","br":"u1q"}'
+-netdev '{"type":"bridge","id":"net6","br":"u1q"}'
+-netdev '{"type":"bridge","id":"net5","br":"u1q"}'
+-netdev '{"type":"bridge","id":"net4","br":"u1q"}'
 -netdev '{"type":"bridge","id":"net3","br":"u1q"}'
 -netdev '{"type":"bridge","id":"net2","br":"u1q"}'
 -netdev '{"type":"bridge","id":"net1","br":"u1q"}'
 
+-device '{"driver":"virtio-net-pci","netdev":"net8","bus":"pci.3","addr":"0x0.0x7","sriov-pf":"net1"}'
+-device '{"driver":"virtio-net-pci","netdev":"net7","bus":"pci.3","addr":"0x0.0x6","sriov-pf":"net1"}'
+-device '{"driver":"virtio-net-pci","netdev":"net6","bus":"pci.3","addr":"0x0.0x5","sriov-pf":"net1"}'
+-device '{"driver":"virtio-net-pci","netdev":"net5","bus":"pci.3","addr":"0x0.0x4","sriov-pf":"net1"}'
+-device '{"driver":"virtio-net-pci","netdev":"net4","bus":"pci.3","addr":"0x0.0x3","sriov-pf":"net1"}'
 -device '{"driver":"virtio-net-pci","netdev":"net3","bus":"pci.3","addr":"0x0.0x2","sriov-pf":"net1"}'
 -device '{"driver":"virtio-net-pci","netdev":"net2","bus":"pci.3","addr":"0x0.0x1","sriov-pf":"net1"}'
 -device '{"driver":"virtio-net-pci","netdev":"net1","bus":"pci.3","addr":"0x0.0x0","id":"net1"}'
+
+-device '{"driver":"intel-iommu","caching-mode":true}'
 endef
 
 define RENDER_USER_DATA_YML
