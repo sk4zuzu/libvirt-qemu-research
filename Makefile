@@ -6,6 +6,8 @@ SSH_OPTIONS := -o ForwardAgent=yes \
                -o GlobalKnownHostsFile=/dev/null \
                -o UserKnownHostsFile=/dev/null
 
+CONFIRM := false
+
 define PACKER_TASKS_MAKE
 .PHONY: $(1)-disk
 
@@ -17,9 +19,11 @@ define LIBVIRT_QEMU_TASKS_MAKE
 .PHONY: $(1)-apply $(1)-destroy
 
 $(1)-apply:
+	$(2)
 	cd $(SELF)/$(1)/ && make $(1)-apply
 
 $(1)-destroy:
+	$(2)
 	cd $(SELF)/$(1)/ && make $(1)-destroy $(1)-clean
 endef
 
@@ -32,7 +36,7 @@ $(1)-ssh%:
 	@ssh $(SSH_OPTIONS) $(3)$$* $(2)
 endef
 
-.PHONY: all binaries b become
+.PHONY: all binaries c confirm b become
 
 all:
 
@@ -41,8 +45,11 @@ binaries:
 
 $(eval $(call PACKER_TASKS_MAKE,ubuntu))
 
-$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1q))
-$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1v))
+c confirm:
+	@: $(eval CONFIRM := true)
+
+$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1q,$$(CONFIRM)))
+$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1v,$$(CONFIRM)))
 
 b become:
 	@: $(eval BECOME_ROOT := -t sudo -i)
@@ -54,6 +61,7 @@ $(eval $(call SSH_TASKS_MAKE,u1v,$$(BECOME_ROOT),ubuntu@10.3.11.))
 
 ls:
 	@machinectl list
+	@ps -ax --no-headers -wwo comm,pid,cmd | gawk '$$1 != "grep" && $$3 ~ /qemu-system-/ {print $$2}'
 
 clean:
 	-make clean -f $(SELF)/Makefile.BINARIES
