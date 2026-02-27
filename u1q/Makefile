@@ -37,17 +37,19 @@ define RENDER_QEMU_CMD_MAKE
 exec qemu-system-x86_64
 
 -daemonize
--name "guest=u1q$(1),debug-threads=on"
+-name 'guest=u1q$(1),debug-threads=on'
 
--machine 'pc-q35-10.1,usb=off,dump-guest-core=off,acpi=on'
+-machine 'pc-q35-10.1,usb=off,dump-guest-core=off,memory-backend=pc.ram,acpi=on'
 -accel 'kvm'
 -cpu 'host,migratable=on'
--m "size=$$(($(2) * 1024))k"
 -smp '2,sockets=2,cores=1,threads=1'
 -no-user-config
 -nodefaults
 -rtc 'base=utc'
 -boot 'strict=on'
+
+-m 'size=$(2)B'
+-object '{"size":$(2),"qom-type":"memory-backend-file","id":"pc.ram","mem-path":"/dev/hugepages/u1q$(1)","x-use-canonical-path-for-ramblock-id":false,"prealloc":true}'
 
 -device '{"driver":"pcie-root-port","port":16,"chassis":1,"id":"pci.1","bus":"pcie.0","multifunction":true,"addr":"0x2"}'
 -device '{"driver":"pcie-root-port","port":17,"chassis":2,"id":"pci.2","bus":"pcie.0","addr":"0x2.0x1"}'
@@ -197,9 +199,9 @@ u1q-apply: net-apply u1q10-apply u1q20-apply u1q30-apply
 
 u1q-destroy: u1q10-destroy u1q20-destroy u1q30-destroy net-destroy
 
-$(eval $(call QEMU_TASKS_MAKE,10,2048))
-$(eval $(call QEMU_TASKS_MAKE,20,3072))
-$(eval $(call QEMU_TASKS_MAKE,30,3072))
+$(eval $(call QEMU_TASKS_MAKE,10,$(shell expr 2048 \* 1048576)))
+$(eval $(call QEMU_TASKS_MAKE,20,$(shell expr 3072 \* 1048576)))
+$(eval $(call QEMU_TASKS_MAKE,30,$(shell expr 3072 \* 1048576)))
 
 .PHONY: net-apply net-destroy
 

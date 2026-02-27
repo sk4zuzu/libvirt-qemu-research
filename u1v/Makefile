@@ -34,6 +34,9 @@ define RENDER_DOMAIN_XML
 <domain type='kvm'>
   <name>u1v$(1)</name>
   <memory unit='MiB'>$(2)</memory>
+  <memoryBacking>
+    <hugepages/>
+  </memoryBacking>
   <vcpu placement='static'>2</vcpu>
   <resource>
     <partition>/machine</partition>
