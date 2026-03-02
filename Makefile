@@ -50,12 +50,14 @@ c confirm:
 
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1v,$$(CONFIRM)))
+$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u2q,$$(CONFIRM)))
 
 b become:
 	@: $(eval BECOME_ROOT := -t sudo -i)
 
 $(eval $(call SSH_TASKS_MAKE,u1q,$$(BECOME_ROOT),ubuntu@10.3.10.))
 $(eval $(call SSH_TASKS_MAKE,u1v,$$(BECOME_ROOT),ubuntu@10.3.11.))
+$(eval $(call SSH_TASKS_MAKE,u2q,$$(BECOME_ROOT),ubuntu@10.3.12.))
 
 .PHONY: ls clean
 
@@ -68,3 +70,4 @@ clean:
 	-cd $(SELF)/packer/ubuntu/ && make clean
 	-cd $(SELF)/u1q/ && make u1q-clean
 	-cd $(SELF)/u1v/ && make u1v-clean
+	-cd $(SELF)/u2q/ && make u2q-clean
