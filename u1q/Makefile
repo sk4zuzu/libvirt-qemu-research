@@ -1,9 +1,10 @@
 SHELL := $(shell which bash)
 SELF  := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 
-BASH  ?= doas bash
-KILL  ?= doas kill
-VIRSH ?= doas virsh
+BASH   ?= doas bash
+KILL   ?= doas kill
+UNLINK ?= doas unlink
+VIRSH  ?= doas virsh
 
 PUBKEY ?= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5ndznuZTNZ8u7FCYKgv6Q3/HUVxnaha3tPDUXPfIIw
 
@@ -49,7 +50,7 @@ exec qemu-system-x86_64
 -boot 'strict=on'
 
 -m 'size=$(2)B'
--object '{"size":$(2),"qom-type":"memory-backend-file","id":"pc.ram","mem-path":"/dev/hugepages/u1q$(1)","x-use-canonical-path-for-ramblock-id":false,"prealloc":true}'
+-object '{"size":$(2),"qom-type":"memory-backend-file","id":"pc.ram","mem-path":"/dev/hugepages/u1q$(1)","x-use-canonical-path-for-ramblock-id":false,"prealloc":true,"share":true}'
 
 -device '{"driver":"pcie-root-port","port":16,"chassis":1,"id":"pci.1","bus":"pcie.0","multifunction":true,"addr":"0x2"}'
 -device '{"driver":"pcie-root-port","port":17,"chassis":2,"id":"pci.2","bus":"pcie.0","addr":"0x2.0x1"}'
@@ -76,7 +77,7 @@ exec qemu-system-x86_64
 -device '{"driver":"virtio-balloon-pci","id":"balloon0","bus":"pci.7","addr":"0x0"}'
 
 -netdev '{"type":"bridge","id":"net0","br":"u1q"}'
--device '{"driver":"virtio-net-pci","netdev":"net0","bus":"pci.2","addr":"0x0"}'
+-device '{"driver":"virtio-net-pci","netdev":"net0","iommu_platform":true,"disable-legacy":"on","bus":"pci.2","addr":"0x0","mac":"52:54:03:00:10:$(1)","mq":true,"vectors":6}'
 
 
 -netdev '{"type":"bridge","id":"net8","br":"u1q"}'
@@ -84,10 +85,10 @@ exec qemu-system-x86_64
 -netdev '{"type":"bridge","id":"net6","br":"u1q"}'
 -netdev '{"type":"bridge","id":"net5","br":"u1q"}'
 
--device '{"driver":"virtio-net-pci","netdev":"net8","bus":"pci.4","addr":"0x0.0x3","sriov-pf":"net5"}'
--device '{"driver":"virtio-net-pci","netdev":"net7","bus":"pci.4","addr":"0x0.0x2","sriov-pf":"net5"}'
--device '{"driver":"virtio-net-pci","netdev":"net6","bus":"pci.4","addr":"0x0.0x1","sriov-pf":"net5"}'
--device '{"driver":"virtio-net-pci","netdev":"net5","bus":"pci.4","addr":"0x0.0x0","id":"net5"}'
+-device '{"driver":"virtio-net-pci","netdev":"net8","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x3","sriov-pf":"net5"}'
+-device '{"driver":"virtio-net-pci","netdev":"net7","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x2","sriov-pf":"net5"}'
+-device '{"driver":"virtio-net-pci","netdev":"net6","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x1","sriov-pf":"net5"}'
+-device '{"driver":"virtio-net-pci","netdev":"net5","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x0","id":"net5"}'
 
 
 -netdev '{"type":"bridge","id":"net4","br":"u1q"}'
@@ -95,10 +96,10 @@ exec qemu-system-x86_64
 -netdev '{"type":"bridge","id":"net2","br":"u1q"}'
 -netdev '{"type":"bridge","id":"net1","br":"u1q"}'
 
--device '{"driver":"virtio-net-pci","netdev":"net4","bus":"pci.3","addr":"0x0.0x3","sriov-pf":"net1"}'
--device '{"driver":"virtio-net-pci","netdev":"net3","bus":"pci.3","addr":"0x0.0x2","sriov-pf":"net1"}'
--device '{"driver":"virtio-net-pci","netdev":"net2","bus":"pci.3","addr":"0x0.0x1","sriov-pf":"net1"}'
--device '{"driver":"virtio-net-pci","netdev":"net1","bus":"pci.3","addr":"0x0.0x0","id":"net1"}'
+-device '{"driver":"virtio-net-pci","netdev":"net4","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x3","sriov-pf":"net1"}'
+-device '{"driver":"virtio-net-pci","netdev":"net3","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x2","sriov-pf":"net1"}'
+-device '{"driver":"virtio-net-pci","netdev":"net2","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x1","sriov-pf":"net1"}'
+-device '{"driver":"virtio-net-pci","netdev":"net1","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x0","id":"net1"}'
 
 
 -device '{"driver":"intel-iommu","caching-mode":true}'
@@ -141,18 +142,6 @@ ethernets:
   enp2s0:
     dhcp4: false
     dhcp6: false
-  eth1:
-    dhcp4: false
-    dhcp6: false
-  eth2:
-    dhcp4: false
-    dhcp6: false
-bridges:
-  br0:
-    interfaces: [enp2s0]
-    dhcp4: false
-    dhcp6: false
-    macaddress: '52:54:03:00:10:$(1)'
     addresses: ['10.3.10.$(1)/24']
     routes:
       - metric: 0
@@ -161,7 +150,40 @@ bridges:
     nameservers:
       addresses: ['10.3.10.1']
       search: ['u1q.lh']
+  eth1:
+    dhcp4: false
+    dhcp6: false
+  eth2:
+    dhcp4: false
+    dhcp6: false
 endef
+
+#define RENDER_NETWORK_CONFIG_YML
+#version: 2
+#ethernets:
+#  enp2s0:
+#    dhcp4: false
+#    dhcp6: false
+#  eth1:
+#    dhcp4: false
+#    dhcp6: false
+#  eth2:
+#    dhcp4: false
+#    dhcp6: false
+#bridges:
+#  br0:
+#    interfaces: [enp2s0]
+#    dhcp4: false
+#    dhcp6: false
+#    addresses: ['10.3.10.$(1)/24']
+#    routes:
+#      - metric: 0
+#        to: '0.0.0.0/0'
+#        via: '10.3.10.1'
+#    nameservers:
+#      addresses: ['10.3.10.1']
+#      search: ['u1q.lh']
+#endef
 
 define QEMU_TASKS_MAKE
 $(SELF)/.cache/u1q$(1).iso: _USER_DATA_YML = $$(call RENDER_USER_DATA_YML,$(1))
@@ -187,6 +209,7 @@ u1q$(1)-destroy:
 	ps -ax --no-headers -wwo pid,cmd \
 	| gawk '/^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=u1q$(1),/ {print $$$$1}' \
 	| xargs --no-run-if-empty -n1 -P1 $(KILL)
+	-$(UNLINK) /dev/hugepages/u1q$(1)
 endef
 
 export
@@ -200,8 +223,8 @@ u1q-apply: net-apply u1q10-apply u1q20-apply u1q30-apply
 u1q-destroy: u1q10-destroy u1q20-destroy u1q30-destroy net-destroy
 
 $(eval $(call QEMU_TASKS_MAKE,10,$(shell expr 2048 \* 1048576)))
-$(eval $(call QEMU_TASKS_MAKE,20,$(shell expr 3072 \* 1048576)))
-$(eval $(call QEMU_TASKS_MAKE,30,$(shell expr 3072 \* 1048576)))
+$(eval $(call QEMU_TASKS_MAKE,20,$(shell expr 5120 \* 1048576)))
+$(eval $(call QEMU_TASKS_MAKE,30,$(shell expr 5120 \* 1048576)))
 
 .PHONY: net-apply net-destroy
 
