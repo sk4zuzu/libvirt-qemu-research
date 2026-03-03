@@ -32,7 +32,9 @@ apt-get -q install -y --no-install-recommends \
     vim
 
 apt-get -q install -y --no-install-recommends \
-    driverctl
+    driverctl \
+    libhugetlbfs-bin \
+    numactl
 
 policy_rc_d_enable
 
