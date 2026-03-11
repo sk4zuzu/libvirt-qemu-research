@@ -44,11 +44,13 @@ binaries:
 	make -f $(SELF)/Makefile.BINARIES
 
 $(eval $(call PACKER_TASKS_MAKE,opensuse))
+$(eval $(call PACKER_TASKS_MAKE,redhat))
 $(eval $(call PACKER_TASKS_MAKE,ubuntu))
 
 c confirm:
 	@: $(eval CONFIRM := true)
 
+$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,r1q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,s1q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1v,$$(CONFIRM)))
@@ -57,6 +59,7 @@ $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u2q,$$(CONFIRM)))
 b become:
 	@: $(eval BECOME_ROOT := -t sudo -i)
 
+$(eval $(call SSH_TASKS_MAKE,r1q,$$(BECOME_ROOT),cloud-user@10.3.30.))
 $(eval $(call SSH_TASKS_MAKE,s1q,$$(BECOME_ROOT),opensuse@10.3.20.))
 $(eval $(call SSH_TASKS_MAKE,u1q,$$(BECOME_ROOT),ubuntu@10.3.10.))
 $(eval $(call SSH_TASKS_MAKE,u1v,$$(BECOME_ROOT),ubuntu@10.3.11.))
@@ -71,7 +74,9 @@ ls:
 clean:
 	-make clean -f $(SELF)/Makefile.BINARIES
 	-cd $(SELF)/packer/opensuse/ && make clean
+	-cd $(SELF)/packer/redhat/ && make clean
 	-cd $(SELF)/packer/ubuntu/ && make clean
+	-cd $(SELF)/r1q/ && make r1q-clean
 	-cd $(SELF)/s1q/ && make s1q-clean
 	-cd $(SELF)/u1q/ && make u1q-clean
 	-cd $(SELF)/u1v/ && make u1v-clean

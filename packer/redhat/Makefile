@@ -1,0 +1,103 @@
+SHELL := $(shell which bash)
+SELF  := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
+
+NAME := redhat
+
+# https://access.redhat.com/management/systems
+include $(SELF)/subscription.mk
+
+# https://access.redhat.com/downloads/content/479/ver=/rhel---9/9.7/x86_64/product-software
+RELEASE  := 9
+VERSION  := $(RELEASE).7
+ARTIFACT := rhel-$(VERSION)-x86_64-kvm.qcow2
+CHECKSUM := e89e0a3e28c3e7fb73a97483b60130d5a3e4bba9481ae282ec6e0551ccf30047
+
+CPUS      ?= 2
+MEMORY    ?= 2048
+DISK_SIZE ?= 12288
+
+PACKER             := $(SELF)/../../bin/packer
+PACKER_PLUGIN_PATH := $(SELF)/../../bin
+PACKER_LOG         ?= 1
+HEADLESS           ?= true
+
+define CLOUD_CONFIG_YML
+#cloud-config
+users:
+- name: cloud-user
+  plain_text_passwd: asd
+  lock_passwd: false
+  sudo: ALL=(ALL) NOPASSWD:ALL
+ssh_pwauth: true
+endef
+
+define PACKERFILE_HCL
+source "qemu" "$(NAME)" {
+  accelerator = "kvm"
+
+  disk_image   = true
+  iso_url      = "file://$(SELF)/../../files/$(ARTIFACT)"
+  iso_checksum = "$(CHECKSUM)"
+
+  memory    = "$(MEMORY)"
+  disk_size = "$(DISK_SIZE)"
+
+  qemuargs = [
+    ["-cpu", "host"],
+    ["-smp", "cpus=$(CPUS)"],
+    ["-cdrom", "$(SELF)/.cache/$(ARTIFACT).iso"],
+    ["-serial", "stdio"],
+  ]
+
+  ssh_username = "cloud-user"
+  ssh_password = "asd"
+
+  output_directory = "$(SELF)/.cache/output/"
+  vm_name          = "packer-$(NAME).qcow2"
+
+  headless = $(HEADLESS)
+}
+build {
+  sources = ["source.qemu.$(NAME)"]
+  provisioner "shell" {
+    environment_vars = [
+      "SUBSCRIPTION_USERNAME=$(SUBSCRIPTION_USERNAME)",
+      "SUBSCRIPTION_PASSWORD=$(SUBSCRIPTION_PASSWORD)",
+      "RELEASE=$(RELEASE)",
+    ]
+    expect_disconnect = true
+    execute_command   = "sudo {{.Vars}} bash {{.Path}}"
+    scripts = [
+      "remote-exec/01-basics.sh",
+      "remote-exec/02-kernel.sh",
+      "remote-exec/98-selinux.sh",
+      "remote-exec/99-fixes.sh",
+    ]
+  }
+}
+endef
+
+export
+
+.PHONY: all
+
+all: build
+
+$(SELF)/.cache/cloud-config.yml:
+	install -d $(SELF)/.cache/ && echo "$$CLOUD_CONFIG_YML" >$@
+
+$(SELF)/.cache/$(ARTIFACT).iso: $(SELF)/.cache/cloud-config.yml
+	cloud-localds $@ $^
+
+.PHONY: build
+
+build: $(SELF)/.cache/output/packer-$(NAME).qcow2
+
+$(SELF)/.cache/output/packer-$(NAME).qcow2: $(SELF)/.cache/$(ARTIFACT).iso Makefile $(wildcard $(SELF)/remote-exec/*.sh)
+	if ! [[ -e $(SELF)/.cache/build.pkr.hcl ]]; then ln -s /dev/stdin $(SELF)/.cache/build.pkr.hcl; fi
+	$(PACKER) build -force $(SELF)/.cache/build.pkr.hcl <<< "$$PACKERFILE_HCL"
+
+.PHONY: clean
+
+clean:
+	-rm -rf $(SELF)/.cache/
