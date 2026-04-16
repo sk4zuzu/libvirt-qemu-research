@@ -142,17 +142,6 @@ ethernets:
   eth0:
     dhcp4: false
     dhcp6: false
-  eth1:
-    dhcp4: false
-    dhcp6: false
-  eth2:
-    dhcp4: false
-    dhcp6: false
-bridges:
-  br0:
-    interfaces: [eth0]
-    dhcp4: false
-    dhcp6: false
     addresses: ['10.3.20.$(1)/24']
     routes:
       - metric: 0
@@ -161,7 +150,40 @@ bridges:
     nameservers:
       addresses: ['10.3.20.1']
       search: ['s1q.lh']
+  eth1:
+    dhcp4: false
+    dhcp6: false
+  eth2:
+    dhcp4: false
+    dhcp6: false
 endef
+
+#define RENDER_NETWORK_CONFIG_YML
+#version: 2
+#ethernets:
+#  eth0:
+#    dhcp4: false
+#    dhcp6: false
+#  eth1:
+#    dhcp4: false
+#    dhcp6: false
+#  eth2:
+#    dhcp4: false
+#    dhcp6: false
+#bridges:
+#  br0:
+#    interfaces: [eth0]
+#    dhcp4: false
+#    dhcp6: false
+#    addresses: ['10.3.20.$(1)/24']
+#    routes:
+#      - metric: 0
+#        to: '0.0.0.0/0'
+#        via: '10.3.20.1'
+#    nameservers:
+#      addresses: ['10.3.20.1']
+#      search: ['s1q.lh']
+#endef
 
 define QEMU_TASKS_MAKE
 $(SELF)/.cache/s1q$(1).iso: _USER_DATA_YML = $$(call RENDER_USER_DATA_YML,$(1))
@@ -201,8 +223,8 @@ s1q-apply: net-apply s1q10-apply s1q20-apply s1q30-apply
 s1q-destroy: s1q10-destroy s1q20-destroy s1q30-destroy net-destroy
 
 $(eval $(call QEMU_TASKS_MAKE,10,$(shell expr 2048 \* 1048576)))
-$(eval $(call QEMU_TASKS_MAKE,20,$(shell expr 4096 \* 1048576)))
-$(eval $(call QEMU_TASKS_MAKE,30,$(shell expr 4096 \* 1048576)))
+$(eval $(call QEMU_TASKS_MAKE,20,$(shell expr 5120 \* 1048576)))
+$(eval $(call QEMU_TASKS_MAKE,30,$(shell expr 5120 \* 1048576)))
 
 .PHONY: net-apply net-destroy
 
