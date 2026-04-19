@@ -19,6 +19,7 @@ zypper --non-interactive install -y \
     make mc \
     net-tools netcat nethogs nmap \
     pv \
+    socat \
     vim
 
 zypper --non-interactive install -y \

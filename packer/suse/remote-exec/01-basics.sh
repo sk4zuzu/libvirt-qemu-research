@@ -20,6 +20,7 @@ zypper --non-interactive install -y \
     make mc \
     net-tools netcat nethogs nftables nmap \
     patch pv \
+    socat \
     vim
 
 zypper --non-interactive install -y \

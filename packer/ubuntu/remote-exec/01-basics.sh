@@ -29,6 +29,7 @@ apt-get -q install -y --no-install-recommends \
     make mc \
     net-tools netcat-traditional nethogs nmap \
     pv \
+    socat \
     vim
 
 apt-get -q install -y --no-install-recommends \

@@ -20,6 +20,7 @@ dnf install -y \
     mc \
     net-tools netcat nethogs nmap \
     pciutils pv \
+    socat \
     vim
 
 sync

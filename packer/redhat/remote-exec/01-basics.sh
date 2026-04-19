@@ -27,6 +27,7 @@ dnf install -y \
     mc \
     net-tools netcat nethogs nmap \
     pv \
+    socat \
     vim \
     wget
 
