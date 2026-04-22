@@ -10,26 +10,26 @@ PUBKEY ?= ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF5ndznuZTNZ8u7FCYKgv6Q3/HUVxnaha3
 
 define NETWORK_XML
 <network>
-  <name>u2q</name>
+  <name>r2q</name>
   <forward mode='nat'>
     <nat>
       <port start='1024' end='65535'/>
     </nat>
   </forward>
-  <bridge name='u2q' stp='on' delay='0'/>
-  <domain name='u2q.lh' localOnly='yes'/>
+  <bridge name='r2q' stp='on' delay='0'/>
+  <domain name='r2q.lh' localOnly='yes'/>
   <dns enable='yes'>
-    <host ip='10.3.12.10'>
-      <hostname>u2q10</hostname>
+    <host ip='10.3.31.10'>
+      <hostname>r2q10</hostname>
     </host>
-    <host ip='10.3.12.20'>
-      <hostname>u2q20</hostname>
+    <host ip='10.3.31.20'>
+      <hostname>r2q20</hostname>
     </host>
-    <host ip='10.3.12.30'>
-      <hostname>u2q30</hostname>
+    <host ip='10.3.31.30'>
+      <hostname>r2q30</hostname>
     </host>
   </dns>
-  <ip address='10.3.12.1' netmask='255.255.255.0'>
+  <ip address='10.3.31.1' netmask='255.255.255.0'>
   </ip>
 </network>
 endef
@@ -38,7 +38,7 @@ define RENDER_QEMU_CMD_MAKE
 exec qemu-system-x86_64
 
 -daemonize
--name 'guest=u2q$(1),debug-threads=on'
+-name 'guest=r2q$(1),debug-threads=on'
 
 -machine 'pc-q35-10.1,usb=off,dump-guest-core=off,memory-backend=pc.ram,acpi=on'
 -accel 'kvm'
@@ -50,7 +50,7 @@ exec qemu-system-x86_64
 -boot 'strict=on'
 
 -m 'size=$(2)B'
--object '{"size":$(2),"qom-type":"memory-backend-file","id":"pc.ram","mem-path":"/dev/hugepages/u2q$(1)","x-use-canonical-path-for-ramblock-id":false,"prealloc":true,"share":true}'
+-object '{"size":$(2),"qom-type":"memory-backend-file","id":"pc.ram","mem-path":"/dev/hugepages/r2q$(1)","x-use-canonical-path-for-ramblock-id":false,"prealloc":true,"share":true}'
 
 -device '{"driver":"pcie-root-port","port":16,"chassis":1,"id":"pci.1","bus":"pcie.0","multifunction":true,"addr":"0x2"}'
 -device '{"driver":"pcie-root-port","port":17,"chassis":2,"id":"pci.2","bus":"pcie.0","addr":"0x2.0x1"}'
@@ -62,10 +62,10 @@ exec qemu-system-x86_64
 -device '{"driver":"pcie-root-port","port":23,"chassis":8,"id":"pci.8","bus":"pcie.0","addr":"0x2.0x7"}'
 -device '{"driver":"qemu-xhci","id":"usb","bus":"pci.5","addr":"0x0"}'
 
--blockdev '{"driver":"file","filename":"$(SELF)/.cache/u2q$(1).qcow2","node-name":"libvirt-2-storage","auto-read-only":true,"discard":"unmap"}'
+-blockdev '{"driver":"file","filename":"$(SELF)/.cache/r2q$(1).qcow2","node-name":"libvirt-2-storage","auto-read-only":true,"discard":"unmap"}'
 -blockdev '{"node-name":"libvirt-2-format","read-only":false,"driver":"qcow2","file":"libvirt-2-storage","backing":null}'
 -device '{"driver":"virtio-blk-pci","bus":"pci.6","addr":"0x0","drive":"libvirt-2-format","id":"virtio-disk0","bootindex":1}'
--blockdev '{"driver":"file","filename":"$(SELF)/.cache/u2q$(1).iso","node-name":"libvirt-1-storage","read-only":true}'
+-blockdev '{"driver":"file","filename":"$(SELF)/.cache/r2q$(1).iso","node-name":"libvirt-1-storage","read-only":true}'
 -device '{"driver":"ide-cd","bus":"ide.3","drive":"libvirt-1-storage","id":"sata0-0-3"}'
 
 -fsdev 'local,security_model=passthrough,id=fsdev-fs0,path=/_shared'
@@ -76,14 +76,13 @@ exec qemu-system-x86_64
 -device '{"driver":"cirrus-vga","id":"video0","bus":"pcie.0","addr":"0x1"}'
 -device '{"driver":"virtio-balloon-pci","id":"balloon0","bus":"pci.7","addr":"0x0"}'
 
--netdev '{"type":"bridge","id":"net0","br":"u2q"}'
--device '{"driver":"virtio-net-pci","netdev":"net0","iommu_platform":true,"disable-legacy":"on","bus":"pci.2","addr":"0x0","mac":"52:54:03:00:10:$(1)","mq":true,"vectors":6}'
+-netdev '{"type":"bridge","id":"net0","br":"r2q"}'
+-device '{"driver":"virtio-net-pci","netdev":"net0","iommu_platform":true,"disable-legacy":"on","bus":"pci.2","addr":"0x0","mac":"52:54:03:00:30:$(1)","mq":true,"vectors":6}'
 
-
--netdev '{"type":"bridge","id":"net8","br":"u2q"}'
--netdev '{"type":"bridge","id":"net7","br":"u2q"}'
--netdev '{"type":"bridge","id":"net6","br":"u2q"}'
--netdev '{"type":"bridge","id":"net5","br":"u2q"}'
+-netdev '{"type":"bridge","id":"net8","br":"r2q"}'
+-netdev '{"type":"bridge","id":"net7","br":"r2q"}'
+-netdev '{"type":"bridge","id":"net6","br":"r2q"}'
+-netdev '{"type":"bridge","id":"net5","br":"r2q"}'
 
 -device '{"driver":"virtio-net-pci","netdev":"net8","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x3","sriov-pf":"net5"}'
 -device '{"driver":"virtio-net-pci","netdev":"net7","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x2","sriov-pf":"net5"}'
@@ -91,10 +90,10 @@ exec qemu-system-x86_64
 -device '{"driver":"virtio-net-pci","netdev":"net5","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x0","id":"net5"}'
 
 
--netdev '{"type":"bridge","id":"net4","br":"u2q"}'
--netdev '{"type":"bridge","id":"net3","br":"u2q"}'
--netdev '{"type":"bridge","id":"net2","br":"u2q"}'
--netdev '{"type":"bridge","id":"net1","br":"u2q"}'
+-netdev '{"type":"bridge","id":"net4","br":"r2q"}'
+-netdev '{"type":"bridge","id":"net3","br":"r2q"}'
+-netdev '{"type":"bridge","id":"net2","br":"r2q"}'
+-netdev '{"type":"bridge","id":"net1","br":"r2q"}'
 
 -device '{"driver":"virtio-net-pci","netdev":"net4","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x3","sriov-pf":"net1"}'
 -device '{"driver":"virtio-net-pci","netdev":"net3","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x2","sriov-pf":"net1"}'
@@ -109,7 +108,7 @@ define RENDER_USER_DATA_YML
 #cloud-config
 ssh_pwauth: false
 users:
-  - name: ubuntu
+  - name: cloud-user
     plain_text_passwd: asd
     lock_passwd: false
     sudo: ALL=(ALL) NOPASSWD:ALL
@@ -132,24 +131,24 @@ runcmd:
 endef
 
 define RENDER_META_DATA_YML
-instance-id: 'u2q$(1)'
-local-hostname: 'u2q$(1)'
+instance-id: 'r2q$(1)'
+local-hostname: 'r2q$(1)'
 endef
 
 define RENDER_NETWORK_CONFIG_YML
 version: 2
 ethernets:
-  enp2s0:
+  eth0:
     dhcp4: false
     dhcp6: false
-    addresses: ['10.3.12.$(1)/24']
+    addresses: ['10.3.31.$(1)/24']
     routes:
       - metric: 0
         to: '0.0.0.0/0'
-        via: '10.3.12.1'
+        via: '10.3.31.1'
     nameservers:
-      addresses: ['10.3.12.1']
-      search: ['u2q.lh']
+      addresses: ['10.3.31.1']
+      search: ['r2q.lh']
   eth1:
     dhcp4: false
     dhcp6: false
@@ -161,7 +160,7 @@ endef
 #define RENDER_NETWORK_CONFIG_YML
 #version: 2
 #ethernets:
-#  enp2s0:
+#  eth0:
 #    dhcp4: false
 #    dhcp6: false
 #  eth1:
@@ -172,44 +171,44 @@ endef
 #    dhcp6: false
 #bridges:
 #  br0:
-#    interfaces: [enp2s0]
+#    interfaces: [eth0]
 #    dhcp4: false
 #    dhcp6: false
-#    addresses: ['10.3.12.$(1)/24']
+#    addresses: ['10.3.31.$(1)/24']
 #    routes:
 #      - metric: 0
 #        to: '0.0.0.0/0'
-#        via: '10.3.12.1'
+#        via: '10.3.31.1'
 #    nameservers:
-#      addresses: ['10.3.12.1']
-#      search: ['u2q.lh']
+#      addresses: ['10.3.31.1']
+#      search: ['r2q.lh']
 #endef
 
 define QEMU_TASKS_MAKE
-$(SELF)/.cache/u2q$(1).iso: _USER_DATA_YML = $$(call RENDER_USER_DATA_YML,$(1))
-$(SELF)/.cache/u2q$(1).iso: _META_DATA_YML = $$(call RENDER_META_DATA_YML,$(1))
-$(SELF)/.cache/u2q$(1).iso: _NETWORK_CONFIG_YML = $$(call RENDER_NETWORK_CONFIG_YML,$(1))
-$(SELF)/.cache/u2q$(1).iso:
+$(SELF)/.cache/r2q$(1).iso: _USER_DATA_YML = $$(call RENDER_USER_DATA_YML,$(1))
+$(SELF)/.cache/r2q$(1).iso: _META_DATA_YML = $$(call RENDER_META_DATA_YML,$(1))
+$(SELF)/.cache/r2q$(1).iso: _NETWORK_CONFIG_YML = $$(call RENDER_NETWORK_CONFIG_YML,$(1))
+$(SELF)/.cache/r2q$(1).iso:
 	install -d $(SELF)/.cache/
 	cloud-localds $$@ /dev/fd/3 /dev/fd/4 -N /dev/fd/5 3<<< "$$$$_USER_DATA_YML" 4<<< "$$$$_META_DATA_YML" 5<<< "$$$$_NETWORK_CONFIG_YML"
 
-$(SELF)/.cache/u2q$(1).qcow2: $(SELF)/../packer/ubuntu/.cache/output/packer-ubuntu.qcow2
+$(SELF)/.cache/r2q$(1).qcow2: $(SELF)/../packer/redhat/.cache/output/packer-redhat.qcow2
 	install -d $(SELF)/.cache/
 	cp $$^ $$@
 
-.PHONY: u2q$(1)-apply u2q$(1)-destroy
+.PHONY: r2q$(1)-apply r2q$(1)-destroy
 
-u2q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2)))
-u2q$(1)-apply: $(SELF)/.cache/u2q$(1).qcow2 $(SELF)/.cache/u2q$(1).iso
+r2q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2)))
+r2q$(1)-apply: $(SELF)/.cache/r2q$(1).qcow2 $(SELF)/.cache/r2q$(1).iso
 	ps -ax --no-headers -wwo pid,cmd \
-	| grep -m1 '^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=u2q$(1),' \
+	| grep -m1 '^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=r2q$(1),' \
 	|| $(BASH) -s <<< "$$$$_QEMU_CMD_SH"
 
-u2q$(1)-destroy:
+r2q$(1)-destroy:
 	ps -ax --no-headers -wwo pid,cmd \
-	| gawk '/^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=u2q$(1),/ {print $$$$1}' \
+	| gawk '/^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=r2q$(1),/ {print $$$$1}' \
 	| xargs --no-run-if-empty -n1 -P1 $(KILL)
-	-$(UNLINK) /dev/hugepages/u2q$(1)
+	-$(UNLINK) /dev/hugepages/r2q$(1)
 endef
 
 export
@@ -218,9 +217,9 @@ export
 
 all:
 
-u2q-apply: net-apply u2q20-apply u2q30-apply
+r2q-apply: net-apply r2q20-apply r2q30-apply
 
-u2q-destroy: u2q20-destroy u2q30-destroy net-destroy
+r2q-destroy: r2q20-destroy r2q30-destroy net-destroy
 
 $(eval $(call QEMU_TASKS_MAKE,20,$(shell expr 8192 \* 1048576)))
 $(eval $(call QEMU_TASKS_MAKE,30,$(shell expr 8192 \* 1048576)))
@@ -228,14 +227,14 @@ $(eval $(call QEMU_TASKS_MAKE,30,$(shell expr 8192 \* 1048576)))
 .PHONY: net-apply net-destroy
 
 net-apply:
-	$(VIRSH) net-dumpxml u2q || $(VIRSH) net-define /dev/fd/0 <<< "$$NETWORK_XML"
-	-$(VIRSH) net-start u2q
+	$(VIRSH) net-dumpxml r2q || $(VIRSH) net-define /dev/fd/0 <<< "$$NETWORK_XML"
+	-$(VIRSH) net-start r2q
 
 net-destroy:
-	-$(VIRSH) net-destroy u2q
-	-$(VIRSH) net-undefine u2q
+	-$(VIRSH) net-destroy r2q
+	-$(VIRSH) net-undefine r2q
 
-.PHONY: u2q-clean
+.PHONY: r2q-clean
 
-u2q-clean:
+r2q-clean:
 	-rm -rf $(SELF)/.cache/

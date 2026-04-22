@@ -54,8 +54,11 @@ c confirm:
 	@: $(eval CONFIRM := true)
 
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,a1q,$$(CONFIRM)))
+$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,a2q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,d1q,$$(CONFIRM)))
+$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,d2q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,r1q,$$(CONFIRM)))
+$(eval $(call LIBVIRT_QEMU_TASKS_MAKE,r2q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,s1q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,s2q,$$(CONFIRM)))
 $(eval $(call LIBVIRT_QEMU_TASKS_MAKE,u1q,$$(CONFIRM)))
@@ -66,8 +69,11 @@ b become:
 	@: $(eval BECOME_ROOT := -t sudo -i)
 
 $(eval $(call SSH_TASKS_MAKE,a1q,$$(BECOME_ROOT),almalinux@10.3.50.))
+$(eval $(call SSH_TASKS_MAKE,a2q,$$(BECOME_ROOT),almalinux@10.3.51.))
 $(eval $(call SSH_TASKS_MAKE,d1q,$$(BECOME_ROOT),debian@10.3.40.))
+$(eval $(call SSH_TASKS_MAKE,d2q,$$(BECOME_ROOT),debian@10.3.41.))
 $(eval $(call SSH_TASKS_MAKE,r1q,$$(BECOME_ROOT),cloud-user@10.3.30.))
+$(eval $(call SSH_TASKS_MAKE,r2q,$$(BECOME_ROOT),cloud-user@10.3.31.))
 $(eval $(call SSH_TASKS_MAKE,s1q,$$(BECOME_ROOT),opensuse@10.3.20.))
 $(eval $(call SSH_TASKS_MAKE,s2q,$$(BECOME_ROOT),suse@10.3.21.))
 $(eval $(call SSH_TASKS_MAKE,u1q,$$(BECOME_ROOT),ubuntu@10.3.10.))
@@ -89,8 +95,11 @@ clean:
 	-cd $(SELF)/packer/suse/ && make clean
 	-cd $(SELF)/packer/ubuntu/ && make clean
 	-cd $(SELF)/a1q/ && make a1q-clean
+	-cd $(SELF)/a1q/ && make a2q-clean
 	-cd $(SELF)/d1q/ && make d1q-clean
+	-cd $(SELF)/d1q/ && make d2q-clean
 	-cd $(SELF)/r1q/ && make r1q-clean
+	-cd $(SELF)/r1q/ && make r2q-clean
 	-cd $(SELF)/s1q/ && make s1q-clean
 	-cd $(SELF)/s1q/ && make s2q-clean
 	-cd $(SELF)/u1q/ && make u1q-clean
