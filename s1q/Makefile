@@ -49,60 +49,58 @@ exec qemu-system-x86_64
 -rtc 'base=utc'
 -boot 'strict=on'
 
--m 'size=$(2)B'
--object '{"size":$(2),"qom-type":"memory-backend-file","id":"pc.ram","mem-path":"/dev/hugepages/s1q$(1)","x-use-canonical-path-for-ramblock-id":false,"prealloc":true,"share":true}'
+-m 'size=$(2)'
+-object 'memory-backend-file,id=pc.ram,size=$(2),mem-path=/dev/hugepages/s1q$(1),prealloc=on,share=on,x-use-canonical-path-for-ramblock-id=off'
 
--device '{"driver":"pcie-root-port","port":16,"chassis":1,"id":"pci.1","bus":"pcie.0","multifunction":true,"addr":"0x2"}'
--device '{"driver":"pcie-root-port","port":17,"chassis":2,"id":"pci.2","bus":"pcie.0","addr":"0x2.0x1"}'
--device '{"driver":"pcie-root-port","port":18,"chassis":3,"id":"pci.3","bus":"pcie.0","addr":"0x2.0x2"}'
--device '{"driver":"pcie-root-port","port":19,"chassis":4,"id":"pci.4","bus":"pcie.0","addr":"0x2.0x3"}'
--device '{"driver":"pcie-root-port","port":20,"chassis":5,"id":"pci.5","bus":"pcie.0","addr":"0x2.0x4"}'
--device '{"driver":"pcie-root-port","port":21,"chassis":6,"id":"pci.6","bus":"pcie.0","addr":"0x2.0x5"}'
--device '{"driver":"pcie-root-port","port":22,"chassis":7,"id":"pci.7","bus":"pcie.0","addr":"0x2.0x6"}'
--device '{"driver":"pcie-root-port","port":23,"chassis":8,"id":"pci.8","bus":"pcie.0","addr":"0x2.0x7"}'
--device '{"driver":"qemu-xhci","id":"usb","bus":"pci.5","addr":"0x0"}'
+-device 'pcie-root-port,id=pci.1,bus=pcie.0,addr=0x2,port=16,chassis=1,multifunction=on'
+-device 'pcie-root-port,id=pci.2,bus=pcie.0,addr=0x2.0x1,port=17,chassis=2'
+-device 'pcie-root-port,id=pci.3,bus=pcie.0,addr=0x2.0x2,port=18,chassis=3'
+-device 'pcie-root-port,id=pci.4,bus=pcie.0,addr=0x2.0x3,port=19,chassis=4'
+-device 'pcie-root-port,id=pci.5,bus=pcie.0,addr=0x2.0x4,port=20,chassis=5'
+-device 'pcie-root-port,id=pci.6,bus=pcie.0,addr=0x2.0x5,port=21,chassis=6'
+-device 'pcie-root-port,id=pci.7,bus=pcie.0,addr=0x2.0x6,port=22,chassis=7'
+-device 'pcie-root-port,id=pci.8,bus=pcie.0,addr=0x2.0x7,port=23,chassis=8'
+-device 'qemu-xhci,id=usb,bus=pci.5,addr=0x0'
 
--blockdev '{"driver":"file","filename":"$(SELF)/.cache/s1q$(1).qcow2","node-name":"libvirt-2-storage","auto-read-only":true,"discard":"unmap"}'
--blockdev '{"node-name":"libvirt-2-format","read-only":false,"driver":"qcow2","file":"libvirt-2-storage","backing":null}'
--device '{"driver":"virtio-blk-pci","bus":"pci.6","addr":"0x0","drive":"libvirt-2-format","id":"virtio-disk0","bootindex":1}'
--blockdev '{"driver":"file","filename":"$(SELF)/.cache/s1q$(1).iso","node-name":"libvirt-1-storage","read-only":true}'
--device '{"driver":"ide-cd","bus":"ide.3","drive":"libvirt-1-storage","id":"sata0-0-3"}'
+-blockdev 'driver=file,filename=$(SELF)/.cache/s1q$(1).qcow2,node-name=libvirt-2-storage,auto-read-only=on,discard=unmap'
+-blockdev 'driver=qcow2,node-name=libvirt-2-format,read-only=off,file=libvirt-2-storage'
+-device 'virtio-blk-pci,bus=pci.6,addr=0x0,drive=libvirt-2-format,id=virtio-disk0,bootindex=1'
+
+-blockdev 'driver=file,filename=$(SELF)/.cache/s1q$(1).iso,node-name=libvirt-1-storage,read-only=on'
+-device 'ide-cd,bus=ide.3,drive=libvirt-1-storage,id=sata0-0-3'
 
 -fsdev 'local,security_model=passthrough,id=fsdev-fs0,path=/_shared'
--device '{"driver":"virtio-9p-pci","id":"fs0","fsdev":"fsdev-fs0","mount_tag":"_shared","bus":"pci.1","addr":"0x0"}'
+-device 'virtio-9p-pci,id=fs0,fsdev=fsdev-fs0,mount_tag=_shared,bus=pci.1,addr=0x0'
 
--audiodev '{"id":"audio1","driver":"none"}'
+-audiodev 'none,id=audio1'
 -vnc "127.0.0.1:$$((1000 + $(1))),audiodev=audio1"
--device '{"driver":"cirrus-vga","id":"video0","bus":"pcie.0","addr":"0x1"}'
--device '{"driver":"virtio-balloon-pci","id":"balloon0","bus":"pci.7","addr":"0x0"}'
+-device 'cirrus-vga,id=video0,bus=pcie.0,addr=0x1'
+-device 'virtio-balloon-pci,id=balloon0,bus=pci.7,addr=0x0'
 
--netdev '{"type":"bridge","id":"net0","br":"s1q"}'
--device '{"driver":"virtio-net-pci","netdev":"net0","iommu_platform":true,"disable-legacy":"on","bus":"pci.2","addr":"0x0","mac":"52:54:03:00:20:$(1)","mq":true,"vectors":6}'
+-netdev 'bridge,id=net0,br=s1q'
+-device 'virtio-net-pci,netdev=net0,iommu_platform=on,disable-legacy=on,bus=pci.2,addr=0x0,mac=52:54:03:00:20:$(1),mq=on,vectors=6'
 
+-netdev 'bridge,id=net8,br=s1q'
+-netdev 'bridge,id=net7,br=s1q'
+-netdev 'bridge,id=net6,br=s1q'
+-netdev 'bridge,id=net5,br=s1q'
 
--netdev '{"type":"bridge","id":"net8","br":"s1q"}'
--netdev '{"type":"bridge","id":"net7","br":"s1q"}'
--netdev '{"type":"bridge","id":"net6","br":"s1q"}'
--netdev '{"type":"bridge","id":"net5","br":"s1q"}'
+-device 'virtio-net-pci,netdev=net8,iommu_platform=on,disable-legacy=on,bus=pci.4,addr=0x0.0x3,sriov-pf=net5'
+-device 'virtio-net-pci,netdev=net7,iommu_platform=on,disable-legacy=on,bus=pci.4,addr=0x0.0x2,sriov-pf=net5'
+-device 'virtio-net-pci,netdev=net6,iommu_platform=on,disable-legacy=on,bus=pci.4,addr=0x0.0x1,sriov-pf=net5'
+-device 'virtio-net-pci,id=net5,netdev=net5,iommu_platform=on,disable-legacy=on,bus=pci.4,addr=0x0.0x0'
 
--device '{"driver":"virtio-net-pci","netdev":"net8","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x3","sriov-pf":"net5"}'
--device '{"driver":"virtio-net-pci","netdev":"net7","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x2","sriov-pf":"net5"}'
--device '{"driver":"virtio-net-pci","netdev":"net6","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x1","sriov-pf":"net5"}'
--device '{"driver":"virtio-net-pci","netdev":"net5","iommu_platform":true,"disable-legacy":"on","bus":"pci.4","addr":"0x0.0x0","id":"net5"}'
+-netdev 'bridge,id=net4,br=s1q'
+-netdev 'bridge,id=net3,br=s1q'
+-netdev 'bridge,id=net2,br=s1q'
+-netdev 'bridge,id=net1,br=s1q'
 
+-device 'virtio-net-pci,netdev=net4,iommu_platform=on,disable-legacy=on,bus=pci.3,addr=0x0.0x3,sriov-pf=net1'
+-device 'virtio-net-pci,netdev=net3,iommu_platform=on,disable-legacy=on,bus=pci.3,addr=0x0.0x2,sriov-pf=net1'
+-device 'virtio-net-pci,netdev=net2,iommu_platform=on,disable-legacy=on,bus=pci.3,addr=0x0.0x1,sriov-pf=net1'
+-device 'virtio-net-pci,id=net1,netdev=net1,iommu_platform=on,disable-legacy=on,bus=pci.3,addr=0x0.0x0'
 
--netdev '{"type":"bridge","id":"net4","br":"s1q"}'
--netdev '{"type":"bridge","id":"net3","br":"s1q"}'
--netdev '{"type":"bridge","id":"net2","br":"s1q"}'
--netdev '{"type":"bridge","id":"net1","br":"s1q"}'
-
--device '{"driver":"virtio-net-pci","netdev":"net4","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x3","sriov-pf":"net1"}'
--device '{"driver":"virtio-net-pci","netdev":"net3","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x2","sriov-pf":"net1"}'
--device '{"driver":"virtio-net-pci","netdev":"net2","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x1","sriov-pf":"net1"}'
--device '{"driver":"virtio-net-pci","netdev":"net1","iommu_platform":true,"disable-legacy":"on","bus":"pci.3","addr":"0x0.0x0","id":"net1"}'
-
-
--device '{"driver":"intel-iommu","caching-mode":true}'
+-device 'intel-iommu,caching-mode=on'
 endef
 
 define RENDER_USER_DATA_YML
@@ -222,9 +220,9 @@ s1q-apply: net-apply s1q10-apply s1q20-apply s1q30-apply
 
 s1q-destroy: s1q10-destroy s1q20-destroy s1q30-destroy net-destroy
 
-$(eval $(call QEMU_TASKS_MAKE,10,$(shell expr 2048 \* 1048576)))
-$(eval $(call QEMU_TASKS_MAKE,20,$(shell expr 5120 \* 1048576)))
-$(eval $(call QEMU_TASKS_MAKE,30,$(shell expr 5120 \* 1048576)))
+$(eval $(call QEMU_TASKS_MAKE,10,2G))
+$(eval $(call QEMU_TASKS_MAKE,20,5G))
+$(eval $(call QEMU_TASKS_MAKE,30,5G))
 
 .PHONY: net-apply net-destroy
 
