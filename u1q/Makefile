@@ -49,22 +49,30 @@ exec qemu-system-x86_64
 -blockdev 'driver=file,filename=$(SELF)/.cache/u1q$(1).iso,node-name=libvirt-1-storage,read-only=on'
 -device 'ide-cd,bus=ide.3,drive=libvirt-1-storage,id=sata0-0-3'
 
--machine 'pc-q35-10.1,usb=off,dump-guest-core=off,memory-backend=pc.ram,acpi=on'
+-machine 'pc-q35-10.1,usb=off,dump-guest-core=off,acpi=on'
 
 -cpu 'host,migratable=on'
 -smp '2,sockets=2,cores=1,threads=1'
 
 -m 'size=$(2)'
--object 'memory-backend-file,id=pc.ram,size=$(2),mem-path=/dev/hugepages/u1q$(1),prealloc=on,share=on,x-use-canonical-path-for-ramblock-id=off'
+-object 'memory-backend-file,id=numa0,size=$(3),mem-path=/dev/hugepages/u1q$(1)-0,prealloc=on,share=on,x-use-canonical-path-for-ramblock-id=off'
+-object 'memory-backend-file,id=numa1,size=$(3),mem-path=/dev/hugepages/u1q$(1)-1,prealloc=on,share=on,x-use-canonical-path-for-ramblock-id=off'
 
--device 'pcie-root-port,id=pci.1,bus=pcie.0,addr=0x2,port=16,chassis=1,multifunction=on'
+-numa 'node,nodeid=0,memdev=numa0,cpus=0'
+-numa 'node,nodeid=1,memdev=numa1,cpus=1'
+
+-device 'pcie-root-port,id=pci.1,bus=pcie.0,addr=0x2.0x0,port=16,chassis=1,multifunction=on'
 -device 'pcie-root-port,id=pci.2,bus=pcie.0,addr=0x2.0x1,port=17,chassis=2'
 -device 'pcie-root-port,id=pci.3,bus=pcie.0,addr=0x2.0x2,port=18,chassis=3'
--device 'pcie-root-port,id=pci.4,bus=pcie.0,addr=0x2.0x3,port=19,chassis=4'
--device 'pcie-root-port,id=pci.5,bus=pcie.0,addr=0x2.0x4,port=20,chassis=5'
 -device 'pcie-root-port,id=pci.6,bus=pcie.0,addr=0x2.0x5,port=21,chassis=6'
 -device 'pcie-root-port,id=pci.7,bus=pcie.0,addr=0x2.0x6,port=22,chassis=7'
 -device 'pcie-root-port,id=pci.8,bus=pcie.0,addr=0x2.0x7,port=23,chassis=8'
+
+-device 'pxb-pcie,id=pxb.0,bus_nr=0x2f,numa_node=0,bus=pcie.0,addr=0x10'
+-device 'pxb-pcie,id=pxb.1,bus_nr=0x3f,numa_node=1,bus=pcie.0,addr=0x11'
+
+-device 'pcie-root-port,id=pci.4,bus=pxb.0,addr=0x0,port=1,chassis=4'
+-device 'pcie-root-port,id=pci.5,bus=pxb.1,addr=0x0,port=1,chassis=5'
 
 -fsdev 'local,security_model=passthrough,id=fsdev-fs0,path=/_shared'
 -device 'virtio-9p-pci,id=fs0,fsdev=fsdev-fs0,mount_tag=_shared,bus=pci.1,addr=0x0'
@@ -207,7 +215,7 @@ $(SELF)/.cache/u1q$(1).qcow2: $(SELF)/../packer/ubuntu/.cache/output/packer-ubun
 
 .PHONY: u1q$(1)-apply u1q$(1)-destroy
 
-u1q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2)))
+u1q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2),$(3)))
 u1q$(1)-apply: $(SELF)/.cache/u1q$(1).qcow2 $(SELF)/.cache/u1q$(1).iso
 	ps -ax --no-headers -wwo pid,cmd \
 	| grep -m1 '^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=u1q$(1),' \
@@ -217,7 +225,8 @@ u1q$(1)-destroy:
 	ps -ax --no-headers -wwo pid,cmd \
 	| gawk '/^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=u1q$(1),/ {print $$$$1}' \
 	| xargs --no-run-if-empty -n1 -P1 $(KILL)
-	-$(UNLINK) /dev/hugepages/u1q$(1)
+	-$(UNLINK) /dev/hugepages/u1q$(1)-0
+	-$(UNLINK) /dev/hugepages/u1q$(1)-1
 endef
 
 export
@@ -230,9 +239,9 @@ u1q-apply: net-apply u1q10-apply u1q20-apply u1q30-apply
 
 u1q-destroy: u1q10-destroy u1q20-destroy u1q30-destroy net-destroy
 
-$(eval $(call QEMU_TASKS_MAKE,10,2G))
-$(eval $(call QEMU_TASKS_MAKE,20,5G))
-$(eval $(call QEMU_TASKS_MAKE,30,5G))
+$(eval $(call QEMU_TASKS_MAKE,10,2G,1G))
+$(eval $(call QEMU_TASKS_MAKE,20,14G,7G))
+$(eval $(call QEMU_TASKS_MAKE,30,14G,7G))
 
 .PHONY: net-apply net-destroy
 
