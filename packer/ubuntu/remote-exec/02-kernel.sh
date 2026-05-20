@@ -6,9 +6,13 @@ set -o errexit -o nounset -o pipefail
 set -x
 
 gawk -i inplace -f- /etc/modules <<'AWK'
-/^9pnet_virtio/ { found = 1 }
+/^9pnet_virtio/ { found1 = 1 }
+/^netdevsim/    { found2 = 1 }
 { print }
-ENDFILE { if (!found) print "9pnet_virtio" }
+ENDFILE {
+    if (!found1) print "9pnet_virtio"
+    if (!found2) print "netdevsim"
+}
 AWK
 
 touch /etc/default/grub.d/50-cloudimg-settings.cfg

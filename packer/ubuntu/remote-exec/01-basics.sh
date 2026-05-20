@@ -37,6 +37,9 @@ apt-get -q install -y --no-install-recommends \
     libhugetlbfs-bin \
     numactl
 
+apt-get -q install -y \
+    "linux-modules-extra-$(uname -r)"
+
 policy_rc_d_enable
 
 apt-get -q clean
