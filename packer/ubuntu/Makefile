@@ -56,11 +56,16 @@ source "qemu" "$(NAME)" {
 }
 build {
   sources = ["source.qemu.$(NAME)"]
+  provisioner "file" {
+    source      = "$(SELF)/../../files/switchdevmock.sh"
+    destination = "/var/tmp/switchdevmock.sh"
+  }
   provisioner "shell" {
     execute_command = "sudo {{.Vars}} bash {{.Path}}"
     scripts = [
       "remote-exec/01-basics.sh",
       "remote-exec/02-kernel.sh",
+      "remote-exec/98-rclocal.sh",
       "remote-exec/99-fixes.sh",
     ]
   }
@@ -83,7 +88,7 @@ $(SELF)/.cache/$(ARTIFACT).iso: $(SELF)/.cache/cloud-config.yml
 
 build: $(SELF)/.cache/output/packer-$(NAME).qcow2
 
-$(SELF)/.cache/output/packer-$(NAME).qcow2: $(SELF)/.cache/$(ARTIFACT).iso Makefile $(wildcard $(SELF)/remote-exec/*.sh)
+$(SELF)/.cache/output/packer-$(NAME).qcow2: $(SELF)/.cache/$(ARTIFACT).iso Makefile $(SELF)/../../files/switchdevmock.sh $(wildcard $(SELF)/remote-exec/*.sh)
 	if ! [[ -e $(SELF)/.cache/build.pkr.hcl ]]; then ln -s /dev/stdin $(SELF)/.cache/build.pkr.hcl; fi
 	$(PACKER) build -force $(SELF)/.cache/build.pkr.hcl <<< "$$PACKERFILE_HCL"
 
