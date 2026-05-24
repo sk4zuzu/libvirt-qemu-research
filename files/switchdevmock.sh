@@ -121,7 +121,7 @@ INI
 systemctl daemon-reload
 systemctl restart systemd-udevd.service
 
-install -o 0 -g 0 -m u=rw,go=r /dev/fd/0 "/etc/udev/rules.d/98-switchdevmock-$PFBUS.rules" <<EOF
+install -o 0 -g 0 -m u=rw,go=r /dev/fd/0 "/etc/udev/rules.d/95-switchdevmock-$PFBUS.rules" <<EOF
 SUBSYSTEM=="net", ACTION=="add", ENV{ID_NET_DRIVER}=="netdevsim", ENV{ID_NET_NAME_PATH}=="eni${IID}np*", \\
     NAME="%E{ID_NET_NAME_PATH}"
 
