@@ -28,6 +28,15 @@ define NETWORK_XML
     <host ip='10.3.30.30'>
       <hostname>r1q30</hostname>
     </host>
+    <host ip='10.3.30.40'>
+      <hostname>r1q40</hostname>
+    </host>
+    <host ip='10.3.30.50'>
+      <hostname>r1q50</hostname>
+    </host>
+    <host ip='10.3.30.60'>
+      <hostname>r1q60</hostname>
+    </host>
   </dns>
   <ip address='10.3.30.1' netmask='255.255.255.0'>
   </ip>
@@ -215,6 +224,8 @@ $(SELF)/.cache/r1q$(1).qcow2: $(SELF)/../packer/redhat/.cache/output/packer-redh
 
 .PHONY: r1q$(1)-apply r1q$(1)-destroy
 
+r1q-apply: r1q$(1)-apply
+
 r1q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2),$(3)))
 r1q$(1)-apply: $(SELF)/.cache/r1q$(1).qcow2 $(SELF)/.cache/r1q$(1).iso
 	ps -ax --no-headers -wwo pid,cmd \
@@ -227,6 +238,8 @@ r1q$(1)-destroy:
 	| xargs --no-run-if-empty -n1 -P1 $(KILL)
 	-$(UNLINK) /dev/hugepages/r1q$(1)-0
 	-$(UNLINK) /dev/hugepages/r1q$(1)-1
+
+r1q-destroy: r1q$(1)-destroy
 endef
 
 export
@@ -235,13 +248,15 @@ export
 
 all:
 
-r1q-apply: net-apply r1q10-apply r1q20-apply r1q30-apply
+.PHONY: r1q-apply r1q-destroy
 
-r1q-destroy: r1q10-destroy r1q20-destroy r1q30-destroy net-destroy
+r1q-apply: net-apply
 
 $(eval $(call QEMU_TASKS_MAKE,10,2G,1G))
 $(eval $(call QEMU_TASKS_MAKE,20,14G,7G))
 $(eval $(call QEMU_TASKS_MAKE,30,14G,7G))
+
+r1q-destroy: net-destroy
 
 .PHONY: net-apply net-destroy
 

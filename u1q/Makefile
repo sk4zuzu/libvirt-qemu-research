@@ -28,6 +28,15 @@ define NETWORK_XML
     <host ip='10.3.10.30'>
       <hostname>u1q30</hostname>
     </host>
+    <host ip='10.3.10.40'>
+      <hostname>u1q40</hostname>
+    </host>
+    <host ip='10.3.10.50'>
+      <hostname>u1q50</hostname>
+    </host>
+    <host ip='10.3.10.60'>
+      <hostname>u1q60</hostname>
+    </host>
   </dns>
   <ip address='10.3.10.1' netmask='255.255.255.0'>
   </ip>
@@ -215,6 +224,8 @@ $(SELF)/.cache/u1q$(1).qcow2: $(SELF)/../packer/ubuntu/.cache/output/packer-ubun
 
 .PHONY: u1q$(1)-apply u1q$(1)-destroy
 
+u1q-apply: u1q$(1)-apply
+
 u1q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2),$(3)))
 u1q$(1)-apply: $(SELF)/.cache/u1q$(1).qcow2 $(SELF)/.cache/u1q$(1).iso
 	ps -ax --no-headers -wwo pid,cmd \
@@ -227,6 +238,8 @@ u1q$(1)-destroy:
 	| xargs --no-run-if-empty -n1 -P1 $(KILL)
 	-$(UNLINK) /dev/hugepages/u1q$(1)-0
 	-$(UNLINK) /dev/hugepages/u1q$(1)-1
+
+u1q-destroy: u1q$(1)-destroy
 endef
 
 export
@@ -235,13 +248,15 @@ export
 
 all:
 
-u1q-apply: net-apply u1q10-apply u1q20-apply u1q30-apply
+.PHONY: u1q-apply u1q-destroy
 
-u1q-destroy: u1q10-destroy u1q20-destroy u1q30-destroy net-destroy
+u1q-apply: net-apply
 
 $(eval $(call QEMU_TASKS_MAKE,10,2G,1G))
 $(eval $(call QEMU_TASKS_MAKE,20,14G,7G))
 $(eval $(call QEMU_TASKS_MAKE,30,14G,7G))
+
+u1q-destroy: net-destroy
 
 .PHONY: net-apply net-destroy
 

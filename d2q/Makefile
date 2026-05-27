@@ -19,11 +19,23 @@ define NETWORK_XML
   <bridge name='d2q' stp='on' delay='0'/>
   <domain name='d2q.lh' localOnly='yes'/>
   <dns enable='yes'>
+    <host ip='10.3.41.10'>
+      <hostname>d2q10</hostname>
+    </host>
     <host ip='10.3.41.20'>
       <hostname>d2q20</hostname>
     </host>
     <host ip='10.3.41.30'>
       <hostname>d2q30</hostname>
+    </host>
+    <host ip='10.3.41.40'>
+      <hostname>d2q40</hostname>
+    </host>
+    <host ip='10.3.41.50'>
+      <hostname>d2q50</hostname>
+    </host>
+    <host ip='10.3.41.60'>
+      <hostname>d2q60</hostname>
     </host>
   </dns>
   <ip address='10.3.41.1' netmask='255.255.255.0'>
@@ -204,6 +216,8 @@ $(SELF)/.cache/d2q$(1).qcow2: $(SELF)/../packer/debian/.cache/output/packer-debi
 
 .PHONY: d2q$(1)-apply d2q$(1)-destroy
 
+d2q-apply: d2q$(1)-apply
+
 d2q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2)))
 d2q$(1)-apply: $(SELF)/.cache/d2q$(1).qcow2 $(SELF)/.cache/d2q$(1).iso
 	ps -ax --no-headers -wwo pid,cmd \
@@ -215,6 +229,8 @@ d2q$(1)-destroy:
 	| gawk '/^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=d2q$(1),/ {print $$$$1}' \
 	| xargs --no-run-if-empty -n1 -P1 $(KILL)
 	-$(UNLINK) /dev/hugepages/d2q$(1)
+
+d2q-destroy: d2q$(1)-destroy
 endef
 
 export
@@ -223,12 +239,14 @@ export
 
 all:
 
-d2q-apply: net-apply d2q20-apply d2q30-apply
+.PHONY: d2q-apply d2q-destroy
 
-d2q-destroy: d2q20-destroy d2q30-destroy net-destroy
+d2q-apply: net-apply
 
 $(eval $(call QEMU_TASKS_MAKE,20,8G))
 $(eval $(call QEMU_TASKS_MAKE,30,8G))
+
+d2q-destroy: net-destroy
 
 .PHONY: net-apply net-destroy
 

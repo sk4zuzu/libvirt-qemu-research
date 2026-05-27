@@ -28,6 +28,15 @@ define NETWORK_XML
     <host ip='10.3.40.30'>
       <hostname>d1q30</hostname>
     </host>
+    <host ip='10.3.40.40'>
+      <hostname>d1q40</hostname>
+    </host>
+    <host ip='10.3.40.50'>
+      <hostname>d1q50</hostname>
+    </host>
+    <host ip='10.3.40.60'>
+      <hostname>d1q60</hostname>
+    </host>
   </dns>
   <ip address='10.3.40.1' netmask='255.255.255.0'>
   </ip>
@@ -207,6 +216,8 @@ $(SELF)/.cache/d1q$(1).qcow2: $(SELF)/../packer/debian/.cache/output/packer-debi
 
 .PHONY: d1q$(1)-apply d1q$(1)-destroy
 
+d1q-apply: d1q$(1)-apply
+
 d1q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2)))
 d1q$(1)-apply: $(SELF)/.cache/d1q$(1).qcow2 $(SELF)/.cache/d1q$(1).iso
 	ps -ax --no-headers -wwo pid,cmd \
@@ -218,6 +229,8 @@ d1q$(1)-destroy:
 	| gawk '/^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=d1q$(1),/ {print $$$$1}' \
 	| xargs --no-run-if-empty -n1 -P1 $(KILL)
 	-$(UNLINK) /dev/hugepages/d1q$(1)
+
+d1q-destroy: d1q$(1)-destroy
 endef
 
 export
@@ -226,13 +239,15 @@ export
 
 all:
 
-d1q-apply: net-apply d1q10-apply d1q20-apply d1q30-apply
+.PHONY: d1q-apply d1q-destroy
 
-d1q-destroy: d1q10-destroy d1q20-destroy d1q30-destroy net-destroy
+d1q-apply: net-apply
 
 $(eval $(call QEMU_TASKS_MAKE,10,2G))
 $(eval $(call QEMU_TASKS_MAKE,20,5G))
 $(eval $(call QEMU_TASKS_MAKE,30,5G))
+
+d1q-destroy: net-destroy
 
 .PHONY: net-apply net-destroy
 

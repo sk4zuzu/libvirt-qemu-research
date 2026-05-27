@@ -28,6 +28,15 @@ define NETWORK_XML
     <host ip='10.3.20.30'>
       <hostname>s1q30</hostname>
     </host>
+    <host ip='10.3.20.40'>
+      <hostname>s1q40</hostname>
+    </host>
+    <host ip='10.3.20.50'>
+      <hostname>s1q50</hostname>
+    </host>
+    <host ip='10.3.20.60'>
+      <hostname>s1q60</hostname>
+    </host>
   </dns>
   <ip address='10.3.20.1' netmask='255.255.255.0'>
   </ip>
@@ -207,6 +216,8 @@ $(SELF)/.cache/s1q$(1).qcow2: $(SELF)/../packer/opensuse/.cache/output/packer-op
 
 .PHONY: s1q$(1)-apply s1q$(1)-destroy
 
+s1q-apply: s1q$(1)-apply
+
 s1q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2)))
 s1q$(1)-apply: $(SELF)/.cache/s1q$(1).qcow2 $(SELF)/.cache/s1q$(1).iso
 	ps -ax --no-headers -wwo pid,cmd \
@@ -218,6 +229,8 @@ s1q$(1)-destroy:
 	| gawk '/^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=s1q$(1),/ {print $$$$1}' \
 	| xargs --no-run-if-empty -n1 -P1 $(KILL)
 	-$(UNLINK) /dev/hugepages/s1q$(1)
+
+s1q-destroy: s1q$(1)-destroy
 endef
 
 export
@@ -226,13 +239,15 @@ export
 
 all:
 
-s1q-apply: net-apply s1q10-apply s1q20-apply s1q30-apply
+.PHONY: s1q-apply s1q-destroy
 
-s1q-destroy: s1q10-destroy s1q20-destroy s1q30-destroy net-destroy
+s1q-apply: net-apply
 
 $(eval $(call QEMU_TASKS_MAKE,10,2G))
 $(eval $(call QEMU_TASKS_MAKE,20,5G))
 $(eval $(call QEMU_TASKS_MAKE,30,5G))
+
+s1q-destroy: net-destroy
 
 .PHONY: net-apply net-destroy
 
