@@ -24,6 +24,15 @@ define NETWORK_XML
     <host ip='10.3.11.30'>
       <hostname>u1v30</hostname>
     </host>
+    <host ip='10.3.11.40'>
+      <hostname>u1v40</hostname>
+    </host>
+    <host ip='10.3.11.50'>
+      <hostname>u1v50</hostname>
+    </host>
+    <host ip='10.3.11.60'>
+      <hostname>u1v60</hostname>
+    </host>
   </dns>
   <ip address='10.3.11.1' netmask='255.255.255.0'>
   </ip>
@@ -249,6 +258,8 @@ $(SELF)/.cache/u1v$(1).qcow2: $(SELF)/../packer/ubuntu/.cache/output/packer-ubun
 
 .PHONY: u1v$(1)-apply u1v$(1)-destroy
 
+u1v-apply: u1v$(1)-apply
+
 u1v$(1)-apply: _DOMAIN_XML = $$(call RENDER_DOMAIN_XML,$(1),$(2))
 u1v$(1)-apply: $(SELF)/.cache/u1v$(1).qcow2 $(SELF)/.cache/u1v$(1).iso
 	$(VIRSH) dumpxml u1v$(1) || $(VIRSH) define /dev/fd/0 <<< "$$$$_DOMAIN_XML"
@@ -257,21 +268,25 @@ u1v$(1)-apply: $(SELF)/.cache/u1v$(1).qcow2 $(SELF)/.cache/u1v$(1).iso
 u1v$(1)-destroy:
 	-$(VIRSH) destroy u1v$(1)
 	-$(VIRSH) undefine u1v$(1)
+
+u1v-destroy: u1v$(1)-destroy
 endef
 
 export
 
-.PHONY: all u1v-apply u1v-destroy
+.PHONY: all
 
 all:
 
-u1v-apply: net-apply u1v10-apply u1v20-apply u1v30-apply
+.PHONY: u1v-apply u1v-destroy
 
-u1v-destroy: u1v10-destroy u1v20-destroy u1v30-destroy net-destroy
+u1v-apply: net-apply
 
 $(eval $(call DOMAIN_TASKS_MAKE,10,2048))
 $(eval $(call DOMAIN_TASKS_MAKE,20,3072))
 $(eval $(call DOMAIN_TASKS_MAKE,30,3072))
+
+u1v-destroy: net-destroy
 
 .PHONY: net-apply net-destroy
 
