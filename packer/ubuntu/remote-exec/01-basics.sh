@@ -38,7 +38,8 @@ apt-get -q install -y --no-install-recommends \
     numactl
 
 apt-get -q install -y \
-    "linux-modules-extra-$(uname -r)"
+    "linux-modules-extra-$(uname -r)" \
+    podman
 
 policy_rc_d_enable
 
