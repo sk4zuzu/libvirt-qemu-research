@@ -9,9 +9,9 @@ SSH_OPTIONS := -o ForwardAgent=yes \
 CONFIRM := false
 
 define PACKER_TASKS_MAKE
-.PHONY: $(1)-disk
+.PHONY: $(1)
 
-$(1)-disk:
+$(1):
 	cd $(SELF)/packer/$(1)/ && make build
 endef
 
