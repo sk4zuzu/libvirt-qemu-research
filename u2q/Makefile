@@ -204,6 +204,7 @@ endef
 #    interfaces: [enp2s0]
 #    dhcp4: false
 #    dhcp6: false
+#    macaddress: '52:54:03:00:12:$(1)'
 #    addresses: ['10.3.12.$(1)/24']
 #    routes:
 #      - metric: 0
