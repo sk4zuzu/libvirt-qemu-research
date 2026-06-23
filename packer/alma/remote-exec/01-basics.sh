@@ -14,6 +14,7 @@ dnf install -y \
     wget
 
 dnf install -y \
+    bat \
     htop \
     iftop iproute \
     jq \
