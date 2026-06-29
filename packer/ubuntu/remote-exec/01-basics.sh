@@ -39,6 +39,8 @@ apt-get -q install -y --no-install-recommends \
 
 apt-get -q install -y \
     "linux-modules-extra-$(uname -r)" \
+    multipath-tools \
+    open-iscsi \
     podman
 
 policy_rc_d_enable
