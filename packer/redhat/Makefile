@@ -12,6 +12,12 @@ VERSION  := $(RELEASE).7
 ARTIFACT := rhel-$(VERSION)-x86_64-kvm.qcow2
 CHECKSUM := e89e0a3e28c3e7fb73a97483b60130d5a3e4bba9481ae282ec6e0551ccf30047
 
+## https://access.redhat.com/downloads/content/479/ver=/rhel---10/10.2/x86_64/product-software
+#RELEASE  := 10
+#VERSION  := $(RELEASE).2
+#ARTIFACT := rhel-$(VERSION)-x86_64-kvm.qcow2
+#CHECKSUM := caaacd0b11bbc4206f8c7fec8594b82b4366b3f88ff974dbbf373832ae676f4f
+
 CPUS      ?= 2
 MEMORY    ?= 2048
 DISK_SIZE ?= 12288

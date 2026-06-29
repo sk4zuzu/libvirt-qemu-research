@@ -24,4 +24,9 @@ dnf install -y \
     socat \
     vim
 
+dnf install -y \
+    iscsi-initiator-utils \
+    device-mapper-multipath \
+    podman
+
 sync

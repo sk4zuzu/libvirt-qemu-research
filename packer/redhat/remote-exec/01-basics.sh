@@ -17,7 +17,7 @@ dnf repolist enabled
 
 dnf makecache
 
-dnf update -y
+dnf update -y --allowerasing
 
 dnf install -y \
     curl \
@@ -30,5 +30,10 @@ dnf install -y \
     socat \
     vim \
     wget
+
+dnf install -y \
+    iscsi-initiator-utils \
+    device-mapper-multipath \
+    podman
 
 sync
