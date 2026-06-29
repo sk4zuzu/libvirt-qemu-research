@@ -75,14 +75,26 @@ exec qemu-system-x86_64
 -device 'pcie-root-port,id=pci.7,bus=pcie.0,addr=0x2.0x6,port=22,chassis=7'
 -device 'pcie-root-port,id=pci.8,bus=pcie.0,addr=0x2.0x7,port=23,chassis=8'
 
+-device 'pcie-root-port,id=pci.9,bus=pcie.0,addr=0x3,port=24,chassis=9,multifunction=on'
+-device 'pcie-root-port,id=pci.10,bus=pcie.0,addr=0x3.0x1,port=25,chassis=10'
+-device 'pcie-root-port,id=pci.11,bus=pcie.0,addr=0x3.0x2,port=26,chassis=11'
+
 -fsdev 'local,security_model=passthrough,id=fsdev-fs0,path=/_shared'
 -device 'virtio-9p-pci,id=fs0,fsdev=fsdev-fs0,mount_tag=_shared,bus=pci.1,addr=0x0'
 
 -device 'qemu-xhci,id=usb,bus=pci.6,addr=0x0'
 
--blockdev 'driver=file,filename=$(SELF)/.cache/r2q$(1).qcow2,node-name=libvirt-2-storage,auto-read-only=on,discard=unmap'
+-blockdev 'driver=file,filename=$(SELF)/.cache/r2q$(1)-0.qcow2,node-name=libvirt-2-storage,auto-read-only=on,discard=unmap'
 -blockdev 'driver=qcow2,node-name=libvirt-2-format,read-only=off,file=libvirt-2-storage'
 -device 'virtio-blk-pci,bus=pci.7,addr=0x0,drive=libvirt-2-format,id=virtio-disk0,bootindex=1'
+
+-blockdev 'driver=file,filename=$(SELF)/.cache/r2q$(1)-1.qcow2,node-name=libvirt-3-storage,auto-read-only=on,discard=unmap'
+-blockdev 'driver=qcow2,node-name=libvirt-3-format,read-only=off,file=libvirt-3-storage'
+-device 'virtio-blk-pci,bus=pci.10,addr=0x0,drive=libvirt-3-format,id=virtio-disk1'
+
+-blockdev 'driver=file,filename=$(SELF)/.cache/r2q$(1)-2.qcow2,node-name=libvirt-4-storage,auto-read-only=on,discard=unmap'
+-blockdev 'driver=qcow2,node-name=libvirt-4-format,read-only=off,file=libvirt-4-storage'
+-device 'virtio-blk-pci,bus=pci.11,addr=0x0,drive=libvirt-4-format,id=virtio-disk2'
 
 -audiodev 'none,id=audio1'
 -vnc "127.0.0.1:$$((1000 + $(1))),audiodev=audio1"
@@ -211,16 +223,24 @@ $(SELF)/.cache/r2q$(1).iso:
 	install -d $(SELF)/.cache/
 	cloud-localds $$@ /dev/fd/3 /dev/fd/4 -N /dev/fd/5 3<<< "$$$$_USER_DATA_YML" 4<<< "$$$$_META_DATA_YML" 5<<< "$$$$_NETWORK_CONFIG_YML"
 
-$(SELF)/.cache/r2q$(1).qcow2: $(SELF)/../packer/redhat/.cache/output/packer-redhat.qcow2
+$(SELF)/.cache/r2q$(1)-0.qcow2: $(SELF)/../packer/redhat/.cache/output/packer-redhat.qcow2
 	install -d $(SELF)/.cache/
 	cp $$^ $$@
+
+$(SELF)/.cache/r2q$(1)-1.qcow2:
+	install -d $(SELF)/.cache/
+	qemu-img create -f qcow2 $$@ 32G
+
+$(SELF)/.cache/r2q$(1)-2.qcow2:
+	install -d $(SELF)/.cache/
+	qemu-img create -f qcow2 $$@ 32G
 
 .PHONY: r2q$(1)-apply r2q$(1)-destroy
 
 r2q-apply: r2q$(1)-apply
 
 r2q$(1)-apply: _QEMU_CMD_SH = $$(strip $$(call RENDER_QEMU_CMD_MAKE,$(1),$(2)))
-r2q$(1)-apply: $(SELF)/.cache/r2q$(1).qcow2 $(SELF)/.cache/r2q$(1).iso
+r2q$(1)-apply: $(SELF)/.cache/r2q$(1).iso $(SELF)/.cache/r2q$(1)-0.qcow2 $(SELF)/.cache/r2q$(1)-1.qcow2 $(SELF)/.cache/r2q$(1)-2.qcow2
 	ps -ax --no-headers -wwo pid,cmd \
 	| grep -m1 '^ *[0-9]* qemu-system-x86_64 -daemonize -name guest=r2q$(1),' \
 	|| $(BASH) -s <<< "$$$$_QEMU_CMD_SH"
@@ -244,8 +264,12 @@ all:
 
 r2q-apply: net-apply
 
-$(eval $(call QEMU_TASKS_MAKE,20,8G))
-$(eval $(call QEMU_TASKS_MAKE,30,8G))
+$(eval $(call QEMU_TASKS_MAKE,10,4G))
+$(eval $(call QEMU_TASKS_MAKE,20,4G))
+$(eval $(call QEMU_TASKS_MAKE,30,4G))
+$(eval $(call QEMU_TASKS_MAKE,40,4G))
+$(eval $(call QEMU_TASKS_MAKE,50,4G))
+$(eval $(call QEMU_TASKS_MAKE,60,4G))
 
 r2q-destroy: net-destroy
 
