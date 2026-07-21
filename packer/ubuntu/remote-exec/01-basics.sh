@@ -22,7 +22,7 @@ apt-get -q install -y --no-install-recommends \
     software-properties-common
 
 apt-get -q install -y --no-install-recommends \
-    gawk \
+    gawk gcc \
     htop \
     iftop iproute2 \
     jq \
