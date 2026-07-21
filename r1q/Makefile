@@ -83,8 +83,8 @@ exec qemu-system-x86_64
 -device 'pcie-root-port,id=pci.4,bus=pxb.0,addr=0x0,port=1,chassis=4'
 -device 'pcie-root-port,id=pci.5,bus=pxb.1,addr=0x0,port=1,chassis=5'
 
--fsdev 'local,security_model=passthrough,id=fsdev-fs0,path=/_shared'
--device 'virtio-9p-pci,id=fs0,fsdev=fsdev-fs0,mount_tag=_shared,bus=pci.1,addr=0x0'
+-fsdev 'local,security_model=passthrough,id=fsdev-fs0,path=/stor'
+-device 'virtio-9p-pci,id=fs0,fsdev=fsdev-fs0,mount_tag=stor,bus=pci.1,addr=0x0'
 
 -device 'qemu-xhci,id=usb,bus=pci.6,addr=0x0'
 
@@ -144,7 +144,7 @@ growpart:
   mode: auto
   devices: [/]
 mounts:
-  - ['_shared', '/_shared', '9p', 'trans=virtio,version=9p2000.L,rw', '0', '0']
+  - ['stor', '/stor', '9p', 'trans=virtio,version=9p2000.L,rw', '0', '0']
 write_files:
   - path: /etc/sysctl.d/98-ip-forward.conf
     content: |

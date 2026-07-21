@@ -139,8 +139,8 @@ define RENDER_DOMAIN_XML
       <address type='pci' domain='0x0000' bus='0x00' slot='0x02' function='0x7'/>
     </controller>
     <filesystem type='mount' accessmode='passthrough'>
-      <source dir='/_shared'/>
-      <target dir='_shared'/>
+      <source dir='/stor'/>
+      <target dir='stor'/>
       <alias name='fs0'/>
       <address type='pci' domain='0x0000' bus='0x01' slot='0x00' function='0x0'/>
     </filesystem>
@@ -202,7 +202,7 @@ growpart:
   mode: auto
   devices: [/]
 mounts:
-  - ['_shared', '/_shared', '9p', 'trans=virtio,version=9p2000.L,rw', '0', '0']
+  - ['stor', '/stor', '9p', 'trans=virtio,version=9p2000.L,rw', '0', '0']
 write_files:
   - path: /etc/sysctl.d/98-ip-forward.conf
     content: |
