@@ -4,9 +4,9 @@ SELF  := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 NAME := debian
 
 RELEASE  := trixie
-VERSION  := 20260220-2394
+VERSION  := 20260712-2537
 ARTIFACT := debian-13-generic-amd64-$(VERSION).qcow2
-CHECKSUM := 8e7becf9843224e31a271df5eb6aa90a8077642786996f88f299d4f16043c9bfc563a74437ebfe17990c58362176c309cc61c6f09a83f1c274d799dd02997d4d
+CHECKSUM := 78f658893d7aecb56288b86afebb72dcdb1a636e8e9db8bda64851a308697794678ceb5cd3b7c86afd5fb892afbc6baf9d2dbaceb7855347fde8660e8d68e667
 
 CPUS      ?= 1
 MEMORY    ?= 2048

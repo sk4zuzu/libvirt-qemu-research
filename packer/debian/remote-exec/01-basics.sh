@@ -21,14 +21,25 @@ apt-get -q install -y --no-install-recommends \
     curl
 
 apt-get -q install -y --no-install-recommends \
-    gawk \
+    gawk gcc \
     htop \
     iftop iproute2 \
     jq \
-    mc \
+    make mc \
     net-tools netcat-traditional nethogs nmap \
     pv \
+    socat \
     vim
+
+apt-get -q install -y --no-install-recommends \
+    driverctl \
+    libhugetlbfs-bin \
+    numactl
+
+apt-get -q install -y \
+    multipath-tools \
+    open-iscsi \
+    podman
 
 policy_rc_d_enable
 
