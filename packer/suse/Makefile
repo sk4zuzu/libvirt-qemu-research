@@ -9,8 +9,8 @@ include $(SELF)/subscription.mk
 RELEASE_MAJOR := 15
 RELEASE_MINOR := 7
 VERSION       := $(RELEASE_MAJOR).$(RELEASE_MINOR)
-ARTIFACT      := SLES$(RELEASE_MAJOR)-SP$(RELEASE_MINOR)-Minimal-VM.x86_64-Cloud-QU3.qcow2
-CHECKSUM      := 5139dbd69687598a08e7ac97427cf928d3c9dffeb39149688ca465ee6eb9013d
+ARTIFACT      := SLES$(RELEASE_MAJOR)-SP$(RELEASE_MINOR)-Minimal-VM.x86_64-Cloud-QU4.qcow2
+CHECKSUM      := 775a1aa6a9e3787c5ba30b409455eb4f6bb53db827d20defb29d3702aedb570b
 
 CPUS      ?= 1
 MEMORY    ?= 2048
@@ -61,6 +61,7 @@ build {
   sources = ["source.qemu.$(NAME)"]
   provisioner "shell" {
     environment_vars = [
+      "REGISTRATION_EMAIL=$(REGISTRATION_EMAIL)",
       "REGISTRATION_CODE=$(REGISTRATION_CODE)",
       "VERSION=$(VERSION)",
     ]

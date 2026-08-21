@@ -3,7 +3,7 @@
 set -o errexit -o nounset -o pipefail
 set -x
 
-SUSEConnect -r "$REGISTRATION_CODE"
+SUSEConnect -e "$REGISTRATION_EMAIL" -r "$REGISTRATION_CODE"
 SUSEConnect -p "sle-module-legacy/$VERSION/x86_64"
 SUSEConnect -p "sle-module-desktop-applications/$VERSION/x86_64"
 SUSEConnect -p "sle-module-development-tools/$VERSION/x86_64"
