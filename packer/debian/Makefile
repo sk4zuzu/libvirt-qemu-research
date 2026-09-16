@@ -3,10 +3,15 @@ SELF  := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 
 NAME := debian
 
+#RELEASE  := bookworm
+#VERSION  := 20260909-2596
+#ARTIFACT := debian-12-generic-amd64-$(VERSION).qcow2
+#CHECKSUM := 84946d6e2f55b1e8dcc114efc059f13882bd2ccdf36852126a13a0aa4a4ce0efee945406b78280e5942096639edc2a3ced20b70c12d9c7c7366ce364ba47a0ff
+
 RELEASE  := trixie
-VERSION  := 20260712-2537
+VERSION  := 20260831-2587
 ARTIFACT := debian-13-generic-amd64-$(VERSION).qcow2
-CHECKSUM := 78f658893d7aecb56288b86afebb72dcdb1a636e8e9db8bda64851a308697794678ceb5cd3b7c86afd5fb892afbc6baf9d2dbaceb7855347fde8660e8d68e667
+CHECKSUM := 5a069019420fb9441ad4f8004c661fadb747edd5662ca54a17c8f923dee7d717e21dbdaa4ba72d6fce7f920e0217f0a9af382298a7d46ed4bc9dc33ac19181b6
 
 CPUS      ?= 1
 MEMORY    ?= 2048
