@@ -8,6 +8,26 @@ export DEBIAN_FRONTEND=noninteractive
 set -o errexit -o nounset -o pipefail
 set -x
 
+#gawk -i inplace -f- /etc/cloud/cloud.cfg <<'EOF'
+#$1 == "apt_preserve_sources_list:" { $2 = "true"; found=1 }
+#{ print }
+#END { if (!found) print "apt_preserve_sources_list: true" >> FILENAME }
+#EOF
+#
+#cat >/etc/apt/sources.list.d/ubuntu.sources <<EOF
+#Types: deb
+#URIs: http://ubuntu.task.gda.pl/ubuntu/
+#Suites: noble noble-updates noble-backports
+#Components: main universe restricted multiverse
+#Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+#
+#Types: deb
+#URIs: http://ubuntu.task.gda.pl/ubuntu/
+#Suites: noble-security
+#Components: main universe restricted multiverse
+#Signed-By: /usr/share/keyrings/ubuntu-archive-keyring.gpg
+#EOF
+
 apt-get -q update -y
 
 policy_rc_d_disable
@@ -38,8 +58,8 @@ apt-get -q install -y --no-install-recommends \
     numactl
 
 apt-get -q install -y \
-    "linux-modules-extra-$(uname -r)" \
     multipath-tools \
+    nbd-client \
     open-iscsi \
     podman
 

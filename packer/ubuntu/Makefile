@@ -3,14 +3,19 @@ SELF  := $(patsubst %/,%,$(dir $(abspath $(firstword $(MAKEFILE_LIST)))))
 
 NAME := ubuntu
 
-RELEASE  := 24.04
-VERSION  := release-20260615
+#RELEASE  := 24.04
+#VERSION  := release-20260826
+#ARTIFACT := ubuntu-$(RELEASE)-server-cloudimg-amd64.img
+#CHECKSUM := 253f8ad995aa4b735a5f8543b921363d
+
+RELEASE  := 26.04
+VERSION  := release-20260823
 ARTIFACT := ubuntu-$(RELEASE)-server-cloudimg-amd64.img
-CHECKSUM := ff6ba4dfd55cc0cad59c8767b48d73f9
+CHECKSUM := 2172ccc7ce7d58bdebb3192de1b14ce0
 
 CPUS      ?= 1
 MEMORY    ?= 2048
-DISK_SIZE ?= 10240
+DISK_SIZE ?= 36864
 
 PACKER             := $(SELF)/../../bin/packer
 PACKER_PLUGIN_PATH := $(SELF)/../../bin
