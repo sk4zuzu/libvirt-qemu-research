@@ -19,27 +19,14 @@ define NETWORK_XML
   <bridge name='u1q' stp='on' delay='0'/>
   <domain name='u1q.lh' localOnly='yes'/>
   <dns enable='yes'>
-    <host ip='10.3.10.10'>
-      <hostname>u1q10</hostname>
-    </host>
-    <host ip='10.3.10.20'>
-      <hostname>u1q20</hostname>
-    </host>
-    <host ip='10.3.10.30'>
-      <hostname>u1q30</hostname>
-    </host>
-    <host ip='10.3.10.40'>
-      <hostname>u1q40</hostname>
-    </host>
-    <host ip='10.3.10.50'>
-      <hostname>u1q50</hostname>
-    </host>
-    <host ip='10.3.10.60'>
-      <hostname>u1q60</hostname>
-    </host>
+    <host ip='10.3.10.10'><hostname>u1q10</hostname></host>
+    <host ip='10.3.10.20'><hostname>u1q20</hostname></host>
+    <host ip='10.3.10.30'><hostname>u1q30</hostname></host>
+    <host ip='10.3.10.40'><hostname>u1q40</hostname></host>
+    <host ip='10.3.10.50'><hostname>u1q50</hostname></host>
+    <host ip='10.3.10.60'><hostname>u1q60</hostname></host>
   </dns>
-  <ip address='10.3.10.1' netmask='255.255.255.0'>
-  </ip>
+  <ip address='10.3.10.1' netmask='255.255.255.0'/>
 </network>
 endef
 

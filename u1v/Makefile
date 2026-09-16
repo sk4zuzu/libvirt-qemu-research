@@ -15,27 +15,14 @@ define NETWORK_XML
   <bridge name='u1v' stp='on' delay='0'/>
   <domain name='u1v.lh' localOnly='yes'/>
   <dns enable='yes'>
-    <host ip='10.3.11.10'>
-      <hostname>u1v10</hostname>
-    </host>
-    <host ip='10.3.11.20'>
-      <hostname>u1v20</hostname>
-    </host>
-    <host ip='10.3.11.30'>
-      <hostname>u1v30</hostname>
-    </host>
-    <host ip='10.3.11.40'>
-      <hostname>u1v40</hostname>
-    </host>
-    <host ip='10.3.11.50'>
-      <hostname>u1v50</hostname>
-    </host>
-    <host ip='10.3.11.60'>
-      <hostname>u1v60</hostname>
-    </host>
+    <host ip='10.3.11.10'><hostname>u1v10</hostname></host>
+    <host ip='10.3.11.20'><hostname>u1v20</hostname></host>
+    <host ip='10.3.11.30'><hostname>u1v30</hostname></host>
+    <host ip='10.3.11.40'><hostname>u1v40</hostname></host>
+    <host ip='10.3.11.50'><hostname>u1v50</hostname></host>
+    <host ip='10.3.11.60'><hostname>u1v60</hostname></host>
   </dns>
-  <ip address='10.3.11.1' netmask='255.255.255.0'>
-  </ip>
+  <ip address='10.3.11.1' netmask='255.255.255.0'/>
 </network>
 endef
 

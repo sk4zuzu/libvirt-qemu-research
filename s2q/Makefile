@@ -19,27 +19,14 @@ define NETWORK_XML
   <bridge name='s2q' stp='on' delay='0'/>
   <domain name='s2q.lh' localOnly='yes'/>
   <dns enable='yes'>
-    <host ip='10.3.21.10'>
-      <hostname>s2q10</hostname>
-    </host>
-    <host ip='10.3.21.20'>
-      <hostname>s2q20</hostname>
-    </host>
-    <host ip='10.3.21.30'>
-      <hostname>s2q30</hostname>
-    </host>
-    <host ip='10.3.21.40'>
-      <hostname>s2q40</hostname>
-    </host>
-    <host ip='10.3.21.50'>
-      <hostname>s2q50</hostname>
-    </host>
-    <host ip='10.3.21.60'>
-      <hostname>s2q60</hostname>
-    </host>
+    <host ip='10.3.21.10'><hostname>s2q10</hostname></host>
+    <host ip='10.3.21.20'><hostname>s2q20</hostname></host>
+    <host ip='10.3.21.30'><hostname>s2q30</hostname></host>
+    <host ip='10.3.21.40'><hostname>s2q40</hostname></host>
+    <host ip='10.3.21.50'><hostname>s2q50</hostname></host>
+    <host ip='10.3.21.60'><hostname>s2q60</hostname></host>
   </dns>
-  <ip address='10.3.21.1' netmask='255.255.255.0'>
-  </ip>
+  <ip address='10.3.21.1' netmask='255.255.255.0'/>
 </network>
 endef
 
