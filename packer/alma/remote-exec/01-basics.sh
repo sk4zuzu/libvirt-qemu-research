@@ -27,6 +27,7 @@ dnf install -y \
 dnf install -y \
     iscsi-initiator-utils \
     device-mapper-multipath \
+    nbd \
     podman
 
 sync
